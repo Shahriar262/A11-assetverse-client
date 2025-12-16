@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 const PackagesSection = ({ packages = [] }) => {
   return (
     <section className="bg-gray-50 py-14">
@@ -10,9 +12,13 @@ const PackagesSection = ({ packages = [] }) => {
         {/* Packages Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {packages.map((pkg) => (
-            <div
+            <motion.div
               key={pkg.name}
-              className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: pkg * 0.3 }}
+              className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer hover:-translate-y-2  hover:shadow-md transition"
             >
               {/* Package Name */}
               <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
@@ -48,7 +54,7 @@ const PackagesSection = ({ packages = [] }) => {
               <button className="btn btn-sm w-full bg-indigo-600 text-white hover:bg-indigo-700">
                 Choose Plan
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

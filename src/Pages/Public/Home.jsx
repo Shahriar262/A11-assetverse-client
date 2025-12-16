@@ -42,9 +42,10 @@ const Home = () => {
     <main className="overflow-x-hidden">
       <HeroBanner />
       <AboutSection />
+      <PackagesSection packages={packagesFromDB} />
       {/* 
 
-      <PackagesSection packages={packagesFromDB} />
+      
       <FeaturesShowcase />
       <TestimonialsStats />
       <HowItWorks />
