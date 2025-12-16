@@ -88,8 +88,8 @@ const Navbar = ({ user }) => {
   );
 
   return (
-    
-      <div className="navbar bg-white shadow-sm px-[125px]">
+    <div className="navbar bg-white shadow-sm">
+      <div className="navbar max-w-7xl mx-auto px-7">
         {/* Navbar Start */}
         <div className="navbar-start">
           {/* Mobile Menu */}
@@ -165,7 +165,7 @@ const Navbar = ({ user }) => {
           )}
         </div>
       </div>
-    
+    </div>
   );
 };
 
