@@ -6,9 +6,7 @@ import HowItWorks from "../../Components/HomePage/HowItWorks";
 import PackagesSection from "../../Components/HomePage/PackagesSection";
 import TestimonialsStats from "../../Components/HomePage/TestimonialsStats";
 
-
 const Home = () => {
-  
   const packagesFromDB = [
     {
       name: "Basic",
@@ -30,11 +28,7 @@ const Home = () => {
       name: "Premium",
       employeeLimit: 20,
       price: 15,
-      features: [
-        "All Standard features",
-        "Custom Branding",
-        "24/7 Support",
-      ],
+      features: ["All Standard features", "Custom Branding", "24/7 Support"],
     },
   ];
 
@@ -46,13 +40,7 @@ const Home = () => {
       <FeaturesShowcase />
       <TestimonialsStats />
       <HowItWorks />
-      {/* 
-
-      
-      
-      
-      
-      <ContactCTA /> */}
+      <ContactCTA />
     </main>
   );
 };
