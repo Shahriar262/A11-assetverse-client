@@ -44,11 +44,12 @@ const Home = () => {
       <AboutSection />
       <PackagesSection packages={packagesFromDB} />
       <FeaturesShowcase />
+      <TestimonialsStats />
       {/* 
 
       
       
-      <TestimonialsStats />
+      
       <HowItWorks />
       <ContactCTA /> */}
     </main>
