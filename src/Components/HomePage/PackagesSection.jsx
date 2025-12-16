@@ -17,7 +17,7 @@ const PackagesSection = ({ packages = [] }) => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: pkg * 0.3 }}
+              transition={{ duration: 0.6, delay: pkg * 0.2 }}
               className="bg-white p-6 rounded-xl shadow-sm border cursor-pointer hover:-translate-y-2  hover:shadow-md transition"
             >
               {/* Package Name */}

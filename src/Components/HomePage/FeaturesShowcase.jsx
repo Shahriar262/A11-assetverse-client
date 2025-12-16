@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 const FeaturesShowcase = () => {
   const features = [
     "Asset Requests & Approvals",
@@ -17,9 +19,16 @@ const FeaturesShowcase = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f} className="border p-6 rounded-lg">
+            <motion.div
+              key={f}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: f * 0.2 }}
+              className="border p-6 rounded-lg cursor-pointer  hover:-translate-y-2"
+            >
               {f}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

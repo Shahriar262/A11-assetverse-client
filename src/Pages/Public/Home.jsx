@@ -8,7 +8,7 @@ import TestimonialsStats from "../../Components/HomePage/TestimonialsStats";
 
 
 const Home = () => {
-  // Predefined packages (acts like DB data)
+  
   const packagesFromDB = [
     {
       name: "Basic",
@@ -43,10 +43,11 @@ const Home = () => {
       <HeroBanner />
       <AboutSection />
       <PackagesSection packages={packagesFromDB} />
+      <FeaturesShowcase />
       {/* 
 
       
-      <FeaturesShowcase />
+      
       <TestimonialsStats />
       <HowItWorks />
       <ContactCTA /> */}

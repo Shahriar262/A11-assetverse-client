@@ -23,7 +23,7 @@ const AboutSection = () => {
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: i * 0.3 }}
+              transition={{ duration: 0.6, delay: i * 0.2 }}
               className="p-6 border rounded-lg text-center cursor-pointer  hover:-translate-y-2 hover:shadow-lg hover:bg-indigo-50"
             >
               <div className="text-indigo-600 text-3xl mb-3 flex justify-center items-center">
