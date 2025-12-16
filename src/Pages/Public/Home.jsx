@@ -41,9 +41,9 @@ const Home = () => {
   return (
     <main className="overflow-x-hidden">
       <HeroBanner />
+      <AboutSection />
+      {/* 
 
-      {/* <AboutSection />
-      
       <PackagesSection packages={packagesFromDB} />
       <FeaturesShowcase />
       <TestimonialsStats />

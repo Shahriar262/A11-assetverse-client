@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { FaChartLine, FaUsers, FaShieldAlt, FaClock } from "react-icons/fa";
 
 const AboutSection = () => {
@@ -17,10 +18,19 @@ const AboutSection = () => {
 
         <div className="grid md:grid-cols-4 gap-6">
           {benefits.map((b, i) => (
-            <div key={i} className="p-6 border rounded-lg text-center">
-              <div className="text-indigo-600 text-3xl mb-3">{b.icon}</div>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: i * 0.3 }}
+              className="p-6 border rounded-lg text-center cursor-pointer  hover:-translate-y-2 hover:shadow-lg hover:bg-indigo-50"
+            >
+              <div className="text-indigo-600 text-3xl mb-3 flex justify-center items-center">
+                {b.icon}
+              </div>
               <p>{b.text}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
