@@ -45,12 +45,13 @@ const Home = () => {
       <PackagesSection packages={packagesFromDB} />
       <FeaturesShowcase />
       <TestimonialsStats />
+      <HowItWorks />
       {/* 
 
       
       
       
-      <HowItWorks />
+      
       <ContactCTA /> */}
     </main>
   );

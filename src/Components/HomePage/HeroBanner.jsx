@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 const HeroBanner = () => {
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-gray-100 py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
         {/* Text */}

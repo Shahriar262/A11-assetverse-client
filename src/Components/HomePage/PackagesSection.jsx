@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 const PackagesSection = ({ packages = [] }) => {
   return (
-    <section className="bg-gray-50 py-14">
+    <section className="bg-gray-100 py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Section Title */}
         <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-10">
