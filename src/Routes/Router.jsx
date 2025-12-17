@@ -18,7 +18,6 @@ import UpgradePackage from "../Pages/HR/UpgradePackage";
 import HRProfile from "../Pages/HR/HRProfile";
 
 export const router = createBrowserRouter([
-  /* ================= PUBLIC ROUTES ================= */
   {
     path: "/",
     element: <MainLayout />,
@@ -31,18 +30,17 @@ export const router = createBrowserRouter([
     ],
   },
 
-  /* ================= DASHBOARD ROUTES ================= */
+  
   {
     path: "/dashboard",
     element: <DashboardLayout />,
     children: [
-      /* ---- DEFAULT DASHBOARD REDIRECT ---- */
       {
         index: true,
         element: <Navigate to="my-assets" />,
       },
 
-      /* ===== EMPLOYEE DASHBOARD ===== */
+    //  Employee Dashboard
       {
         path: "my-assets",
         element: <MyAssets />,
@@ -60,7 +58,7 @@ export const router = createBrowserRouter([
         element: <Profile />,
       },
 
-      /* ===== HR DASHBOARD ===== */
+      //  HR Dashboard
       {
         path: "asset-list",
         element: <AssetList />,
