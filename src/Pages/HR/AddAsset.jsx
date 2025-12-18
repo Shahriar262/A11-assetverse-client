@@ -1,9 +1,10 @@
 import React from 'react';
+import AddAssetForm from '../../Components/Form/AddAssetForm';
 
 const AddAsset = () => {
     return (
         <div>
-           add asset page 
+           <AddAssetForm />
         </div>
     );
 };
