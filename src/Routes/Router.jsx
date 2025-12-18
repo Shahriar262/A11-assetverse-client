@@ -9,15 +9,14 @@ import DashboardLayout from "../Layouts/DashboardLayout";
 import RequestAsset from "../Pages/Employee/RequestAsset";
 import MyAssets from "../Pages/Employee/MyAssets";
 import MyTeam from "../Pages/Employee/MyTeam";
-import Profile from "../Pages/Employee/Profile";
 import AssetList from "../Pages/HR/AssetList";
 import AddAsset from "../Pages/HR/AddAsset";
 import AllRequests from "../Pages/HR/AllRequests";
 import EmployeeList from "../Pages/HR/EmployeeList";
 import UpgradePackage from "../Pages/HR/UpgradePackage";
-import HRProfile from "../Pages/HR/HRProfile";
 import PrivateRoute from "./PrivateRoute";
 import DashboardRedirect from "../Pages/Dashboard/DashboardRedirect";
+import Profile from "../Pages/Dashboard/Profile";
 
 export const router = createBrowserRouter([
   {
@@ -43,7 +42,17 @@ export const router = createBrowserRouter([
       // Default redirect inside dashboard
       { index: true, element: <DashboardRedirect /> },
 
-      // Employee Dashboard (relative paths)
+      // Shared Profile (HR + Employee)
+      {
+        path: "profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        ),
+      },
+
+      // Employee Dashboard
       {
         path: "my-assets",
         element: (
@@ -68,16 +77,8 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      {
-        path: "profile",
-        element: (
-          <PrivateRoute role="employee">
-            <Profile />
-          </PrivateRoute>
-        ),
-      },
 
-      // HR Dashboard (relative paths)
+      // HR Dashboard
       {
         path: "asset-list",
         element: (
@@ -115,14 +116,6 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute role="hr">
             <UpgradePackage />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "hr-profile",
-        element: (
-          <PrivateRoute role="hr">
-            <HRProfile />
           </PrivateRoute>
         ),
       },
