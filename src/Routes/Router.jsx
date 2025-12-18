@@ -16,6 +16,8 @@ import AllRequests from "../Pages/HR/AllRequests";
 import EmployeeList from "../Pages/HR/EmployeeList";
 import UpgradePackage from "../Pages/HR/UpgradePackage";
 import HRProfile from "../Pages/HR/HRProfile";
+import PrivateRoute from "./PrivateRoute";
+import DashboardRedirect from "../Pages/Dashboard/DashboardRedirect";
 
 export const router = createBrowserRouter([
   {
@@ -30,58 +32,99 @@ export const router = createBrowserRouter([
     ],
   },
 
-  
   {
-    path: "/dashboard",
-    element: <DashboardLayout />,
+    path: "dashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
-      {
-        index: true,
-        element: <Navigate to="my-assets" />,
-      },
+      // Default redirect inside dashboard
+      { index: true, element: <DashboardRedirect /> },
 
-    //  Employee Dashboard
+      // Employee Dashboard (relative paths)
       {
         path: "my-assets",
-        element: <MyAssets />,
+        element: (
+          <PrivateRoute role="employee">
+            <MyAssets />
+          </PrivateRoute>
+        ),
       },
       {
         path: "request-asset",
-        element: <RequestAsset />,
+        element: (
+          <PrivateRoute role="employee">
+            <RequestAsset />
+          </PrivateRoute>
+        ),
       },
       {
         path: "my-team",
-        element: <MyTeam />,
+        element: (
+          <PrivateRoute role="employee">
+            <MyTeam />
+          </PrivateRoute>
+        ),
       },
       {
         path: "profile",
-        element: <Profile />,
+        element: (
+          <PrivateRoute role="employee">
+            <Profile />
+          </PrivateRoute>
+        ),
       },
 
-      //  HR Dashboard
+      // HR Dashboard (relative paths)
       {
         path: "asset-list",
-        element: <AssetList />,
+        element: (
+          <PrivateRoute role="hr">
+            <AssetList />
+          </PrivateRoute>
+        ),
       },
       {
         path: "add-asset",
-        element: <AddAsset />,
+        element: (
+          <PrivateRoute role="hr">
+            <AddAsset />
+          </PrivateRoute>
+        ),
       },
       {
         path: "all-requests",
-        element: <AllRequests />,
+        element: (
+          <PrivateRoute role="hr">
+            <AllRequests />
+          </PrivateRoute>
+        ),
       },
       {
         path: "employee-list",
-        element: <EmployeeList />,
+        element: (
+          <PrivateRoute role="hr">
+            <EmployeeList />
+          </PrivateRoute>
+        ),
       },
       {
         path: "upgrade-package",
-        element: <UpgradePackage />,
+        element: (
+          <PrivateRoute role="hr">
+            <UpgradePackage />
+          </PrivateRoute>
+        ),
       },
       {
         path: "hr-profile",
-        element: <HRProfile />,
+        element: (
+          <PrivateRoute role="hr">
+            <HRProfile />
+          </PrivateRoute>
+        ),
       },
     ],
   },

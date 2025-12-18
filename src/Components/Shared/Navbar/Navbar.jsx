@@ -1,96 +1,29 @@
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
+import useAuth from "../../../hooks/useAuth";
 
-const Navbar = ({ user }) => {
-  const employeeMenu = (
+const Navbar = () => {
+  const { user, logOut } = useAuth();
+
+  const role = user?.role || "employee";
+
+  const publicLinks = (
     <>
       <li>
-        <Link to="/dashboard/my-assets" className="hover:text-indigo-600">
-          My Assets
-        </Link>
+        <NavLink to="/">Home</NavLink>
       </li>
       <li>
-        <Link to="/dashboard/request-asset" className="hover:text-indigo-600">
-          Request Asset
-        </Link>
+        <NavLink to="/register-employee">Join as Employee</NavLink>
       </li>
       <li>
-        <Link to="/dashboard/my-team" className="hover:text-indigo-600">
-          My Team
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/profile" className="hover:text-indigo-600">
-          Profile
-        </Link>
-      </li>
-      <li>
-        <button className="hover:text-indigo-600">Logout</button>
-      </li>
-    </>
-  );
-
-  const hrMenu = (
-    <>
-      <li>
-        <Link to="/dashboard/asset-list" className="hover:text-indigo-600">
-          Asset List
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/add-asset" className="hover:text-indigo-600">
-          Add Asset
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/all-requests" className="hover:text-indigo-600">
-          All Requests
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/employee-list" className="hover:text-indigo-600">
-          My Employee List
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/upgrade-package" className="hover:text-indigo-600">
-          Upgrade Package
-        </Link>
-      </li>
-      <li>
-        <Link to="/dashboard/hr-profile" className="hover:text-indigo-600">
-          Profile
-        </Link>
-      </li>
-      <li>
-        <button className="hover:text-indigo-600">Logout</button>
-      </li>
-    </>
-  );
-
-  const publicMenu = (
-    <>
-      <li>
-        <Link to="/" className="hover:text-indigo-600">
-          Home
-        </Link>
-      </li>
-      <li>
-        <Link to="/register-employee" className="hover:text-indigo-600">
-          Join as Employee
-        </Link>
-      </li>
-      <li>
-        <Link to="/register-hr" className="hover:text-indigo-600">
-          Join as HR Manager
-        </Link>
+        <NavLink to="/register-hr">Join as HR Manager</NavLink>
       </li>
     </>
   );
 
   return (
-    <div className="navbar bg-white shadow-sm">
-      <div className="navbar max-w-7xl mx-auto px-7">
-        {/* Navbar Start */}
+    <div className="navbar bg-base-100 shadow-sm px-4">
+      <div className="max-w-7xl mx-auto w-full px-4 flex items-center">
+        {/* LEFT */}
         <div className="navbar-start">
           {/* Mobile Menu */}
           <div className="dropdown">
@@ -106,41 +39,90 @@ const Navbar = ({ user }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
+                  d="M4 6h16M4 12h8m-8 6h16"
                 />
               </svg>
             </label>
+
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 p-2 shadow bg-white rounded-box w-52"
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
-              {user ? (user.role === "hr" ? hrMenu : employeeMenu) : publicMenu}
+              {!user && publicLinks}
+
+              {user && role === "employee" && (
+                <>
+                  <li>
+                    <NavLink to="/dashboard/my-assets">My Assets</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/my-team">My Team</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/request-asset">
+                      Request Asset
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/profile">Profile</NavLink>
+                  </li>
+                  <li>
+                    <button onClick={logOut} className="text-error">
+                      Logout
+                    </button>
+                  </li>
+                </>
+              )}
+
+              {user && role === "hr" && (
+                <>
+                  <li>
+                    <NavLink to="/dashboard/asset-list">Asset List</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/add-asset">Add Asset</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/all-requests">All Requests</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/employee-list">
+                      Employee List
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/hr-profile">Profile</NavLink>
+                  </li>
+                  <li>
+                    <button onClick={logOut} className="text-error">
+                      Logout
+                    </button>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
           {/* Logo */}
           <Link
             to="/"
-            className="btn btn-ghost text-xl font-bold text-indigo-600 normal-case"
+            className="btn btn-ghost text-xl font-bold text-indigo-600"
           >
             AssetVerse
           </Link>
         </div>
 
-        {/* Navbar Center */}
+        {/* CENTER (Desktop Menu) */}
         <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            {user ? (user.role === "hr" ? hrMenu : employeeMenu) : publicMenu}
-          </ul>
+          {!user && (
+            <ul className="menu menu-horizontal px-1 gap-2">{publicLinks}</ul>
+          )}
         </div>
 
-        {/* Navbar End */}
+        {/* RIGHT */}
         <div className="navbar-end">
           {!user && (
-            <Link
-              to="/login"
-              className="btn btn-sm bg-indigo-600 text-white hover:bg-indigo-700"
-            >
+            <Link to="/login" className="btn btn-primary btn-sm">
               Login
             </Link>
           )}
@@ -148,18 +130,66 @@ const Navbar = ({ user }) => {
           {user && (
             <div className="dropdown dropdown-end">
               <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                <div className="w-10 rounded-full ring ring-indigo-600 ring-offset-2">
+                <div className="w-9 rounded-full">
                   <img
-                    src={user.profileImage || "/default-avatar.png"}
+                    src={user.photoURL || "https://i.ibb.co/2kRZ5q0/user.png"}
                     alt="profile"
                   />
                 </div>
               </label>
+
               <ul
                 tabIndex={0}
-                className="menu menu-sm dropdown-content mt-3 p-2 shadow bg-white rounded-box w-52"
+                className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
               >
-                {user.role === "hr" ? hrMenu : employeeMenu}
+                {role === "employee" && (
+                  <>
+                    <li>
+                      <NavLink to="/dashboard/my-assets">My Assets</NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/my-team">My Team</NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/request-asset">
+                        Request Asset
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/profile">Profile</NavLink>
+                    </li>
+                  </>
+                )}
+
+                {role === "hr" && (
+                  <>
+                    <li>
+                      <NavLink to="/dashboard/asset-list">Asset List</NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/add-asset">Add Asset</NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/all-requests">
+                        All Requests
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/employee-list">
+                        Employee List
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink to="/dashboard/hr-profile">Profile</NavLink>
+                    </li>
+                  </>
+                )}
+
+                <li className="border-t mt-1">
+                  <button onClick={logOut} className="text-error">
+                    Logout
+                  </button>
+                </li>
               </ul>
             </div>
           )}
