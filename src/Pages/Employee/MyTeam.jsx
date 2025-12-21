@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
-import { imgUpload } from "../../utils";
 
 const MyTeam = () => {
   const axiosSecure = useAxiosSecure();
@@ -9,56 +8,41 @@ const MyTeam = () => {
   const [selectedCompany, setSelectedCompany] = useState("");
   const [employees, setEmployees] = useState([]);
 
-  // Load affiliated companies
+  // Fetch all companies where the HR has active employees
   useEffect(() => {
-    const loadCompanies = async () => {
+    const fetchCompanies = async () => {
       try {
-        const res = await axiosSecure.get("/employee/companies");
-        setCompanies(res.data);
-
-        if (res.data.length > 0) {
-          setSelectedCompany(res.data[0].companyName);
-        }
+        const { data } = await axiosSecure.get("/employee/companies");
+        setCompanies(data);
+        if (data.length > 0) setSelectedCompany(data[0].companyName);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch companies:", err);
       }
     };
-
-    loadCompanies();
+    fetchCompanies();
   }, [axiosSecure]);
 
-  // Load team members when company changes
+  // Fetch employees for selected company (only active affiliations)
   useEffect(() => {
     if (!selectedCompany) return;
-
-    const loadTeam = async () => {
+    const fetchTeam = async () => {
       try {
-        const res = await axiosSecure.get(
+        const { data } = await axiosSecure.get(
           `/employee/team?companyName=${selectedCompany}`
         );
-
-        const employeesWithImages = await Promise.all(
-          res.data.map(async (emp) => {
-            if (!emp.profileImage && emp.localImageFile) {
-              const uploadedUrl = await imgUpload(emp.localImageFile);
-              emp.profileImage = uploadedUrl;
-            } else if (!emp.profileImage) {
-              emp.profileImage = "https://i.ibb.co/2kRZ5q0/user.png";
-            }
-            return emp;
-          })
+        // Filter only active affiliations
+        const activeEmployees = data.filter(
+          (emp) => emp.affiliationStatus === "active"
         );
-
-        setEmployees(employeesWithImages);
+        setEmployees(activeEmployees);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch team:", err);
       }
     };
-
-    loadTeam();
+    fetchTeam();
   }, [selectedCompany, axiosSecure]);
 
-  // Birthdays (current month)
+  // Upcoming birthdays in the current month
   const currentMonth = new Date().getMonth();
   const upcomingBirthdays = employees.filter(
     (emp) =>
@@ -69,7 +53,7 @@ const MyTeam = () => {
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-6">My Team</h2>
 
-      {/* Company selector */}
+      {/* Company dropdown */}
       <div className="mb-6">
         <label className="block mb-2 font-medium">Select Company</label>
         <select
@@ -85,32 +69,36 @@ const MyTeam = () => {
         </select>
       </div>
 
-      {/* Team grid */}
+      {/* Employee cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {employees.length === 0 && (
+          <p className="text-gray-500 col-span-full">No employees found.</p>
+        )}
         {employees.map((emp) => (
           <div
-            key={emp.email}
+            key={emp.employeeEmail}
             className="bg-white p-4 rounded-lg shadow flex flex-col items-center text-center"
           >
             <img
-              src={emp.profileImage || "https://i.ibb.co/2kRZ5q0/user.png"} 
-              alt={emp.name}
+              src={emp.profileImage || "https://i.ibb.co/2kRZ5q0/user.png"}
+              alt={emp.employeeName}
               className="w-20 h-20 rounded-full object-cover mb-2"
             />
-            <h3 className="font-semibold">{emp.name}</h3>
-            <p className="text-gray-400 text-sm">{emp.email}</p>
+            <h3 className="font-semibold">{emp.employeeName}</h3>
+            <p className="text-gray-400 text-sm">{emp.employeeEmail}</p>
+            <p className="text-gray-600 text-sm">{emp.position || "-"}</p>
           </div>
         ))}
       </div>
 
-      {/* Birthdays */}
+      {/* Upcoming Birthdays */}
       {upcomingBirthdays.length > 0 && (
         <div className="mt-10">
           <h3 className="text-xl font-semibold mb-4">Upcoming Birthdays</h3>
           <ul className="space-y-2">
             {upcomingBirthdays.map((emp) => (
-              <li key={emp.email} className="flex justify-between">
-                <span>{emp.name}</span>
+              <li key={emp.employeeEmail} className="flex justify-between">
+                <span>{emp.employeeName}</span>
                 <span className="text-gray-500">
                   {format(new Date(emp.dateOfBirth), "dd MMM")}
                 </span>

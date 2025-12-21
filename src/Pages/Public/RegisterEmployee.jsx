@@ -4,10 +4,12 @@ import { TbFidgetSpinner } from "react-icons/tb";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
 import { imgUpload } from "../../utils";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const RegisterEmployee = () => {
   const { createUser, updateUserProfile } = useAuth();
   const navigate = useNavigate();
+  const axiosSecure = useAxiosSecure();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -22,37 +24,37 @@ const RegisterEmployee = () => {
     const imageFile = form.image.files[0];
 
     try {
-      // Firebase user create
+      // 1️⃣ Firebase create
       await createUser(email, password);
 
-      // Upload image if exists
-      let photoURL = null;
+      // 2️⃣ Upload profile image
+      let photoURL = "";
       if (imageFile) {
         photoURL = await imgUpload(imageFile);
       }
 
-      await updateUserProfile(name, photoURL);
+      // 3️⃣ Firebase profile update
+      await updateUserProfile(name, photoURL, "employee");
 
-      // Save user in backend
+      // 4️⃣ Backend save
       const employeeUser = {
         name,
         email,
         dateOfBirth,
         role: "employee",
-        profileImage: photoURL,
+        profileImage: photoURL || "",
+        companyAffiliations: [], // initially empty
       };
 
-      await fetch(`${import.meta.env.VITE_API_URL}/user`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(employeeUser),
-      });
+      await axiosSecure.post("/user/employee", employeeUser);
 
-      toast.success("Employee account created");
+      toast.success("Employee account created. No company affiliation yet.");
       navigate("/login");
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to create account");
+      toast.error(
+        err.response?.data?.message || err.message || "Failed to create account"
+      );
     } finally {
       setLoading(false);
     }

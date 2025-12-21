@@ -1,126 +1,82 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const RequestAsset = () => {
-  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [assets, setAssets] = useState([]);
-  const [selectedAsset, setSelectedAsset] = useState(null);
-  const [note, setNote] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch available assets (quantity > 0)
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const res = await axiosSecure.get("/available-assets");
-        setAssets(res.data);
+        const { data } = await axiosSecure.get("/assets");
+        const availableAssets = data.filter((a) => a.availableQuantity > 0);
+        setAssets(availableAssets);
       } catch (err) {
+        console.error(err);
         toast.error("Failed to fetch assets");
+      } finally {
+        setLoading(false);
       }
     };
     fetchAssets();
   }, [axiosSecure]);
 
-  const openModal = (asset) => {
-    setSelectedAsset(asset);
-    setNote("");
-    setModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedAsset(null);
-    setNote("");
-    setModalOpen(false);
-  };
-
-  const handleRequest = async () => {
-    if (!selectedAsset) return;
-
-    setLoading(true);
-
+  const handleRequest = async (assetId) => {
     try {
-      await axiosSecure.post("/requests", {
-        assetId: selectedAsset._id,
-        note,
-      });
-
-      toast.success("Asset request created");
-      closeModal();
+      await axiosSecure.post("/requests", { assetId });
+      toast.success("Asset request submitted");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to request asset");
-    } finally {
-      setLoading(false);
+      toast.error(err?.response?.data?.message || "Request failed");
     }
   };
 
+  if (loading) {
+    return <p className="text-center">Loading assets...</p>;
+  }
+
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-6">Request an Asset</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-center">
+        Request an Asset
+      </h2>
 
-      {/* Assets Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {assets.map((asset) => (
-          <div
-            key={asset._id}
-            className="bg-white shadow rounded-lg overflow-hidden border"
-          >
-            <img
-              src={asset.productImage || "https://via.placeholder.com/150"}
-              alt={asset.productName}
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg">{asset.productName}</h3>
-              <p className="text-gray-600">Type: {asset.productType}</p>
-              <p className="text-gray-600">
-                Available: {asset.availableQuantity}
+      {assets.length === 0 ? (
+        <p className="text-center text-gray-500">No assets available</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {assets.map((asset) => (
+            <div
+              key={asset._id}
+              className="bg-white rounded-lg shadow-md p-4 flex flex-col"
+            >
+              <img
+                src={asset.productImage || "https://i.ibb.co/2kRZ5q0/user.png"}
+                alt={asset.name}
+                className="h-40 w-full object-cover rounded mb-4"
+              />
+
+              <h3 className="text-lg font-semibold mb-1">{asset.name}</h3>
+
+              <p className="text-sm text-gray-600 mb-1">
+                Type: <span className="font-medium">{asset.type}</span>
+              </p>
+
+              <p className="text-sm text-gray-600 mb-4">
+                Available:{" "}
+                <span className="font-medium">{asset.availableQuantity}</span>
               </p>
 
               <button
-                onClick={() => openModal(asset)}
-                className="w-full mt-2 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+                onClick={() => handleRequest(asset._id)}
+                className="mt-auto bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
               >
-                Request
+                Request Asset
               </button>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Request Modal */}
-      {modalOpen && selectedAsset && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h3 className="text-xl font-semibold mb-4">
-              Request "{selectedAsset.productName}"
-            </h3>
-            <textarea
-              placeholder="Add a note for your request..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-3 text-gray-800"
-            />
-            <div className="flex justify-end gap-3 mt-4">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRequest}
-                disabled={loading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-              >
-                {loading ? "Requesting..." : "Submit Request"}
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       )}
     </div>

@@ -7,59 +7,60 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase/firebase.config";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
 
-  const [role, setRole] = useState("");
-  const [companies, setCompanies] = useState([]);
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState("");
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
   // 🔹 Load profile data
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const fetchProfile = async () => {
       if (!user) return;
-
+      setLoading(true);
       try {
         const token = await user.getIdToken();
 
-        // 1️⃣ role
-        const roleRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/user/role`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
+        if (role === "hr") {
+          // HR info
+          const res = await axios.get(
+            `${import.meta.env.VITE_API_URL}/user/hr-info`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setName(res.data.name || user.displayName || "");
+          setPhoto(res.data.profileImage || user.photoURL || "");
+          if (res.data.company) {
+            setCompanies([res.data.company]);
+          } else {
+            setCompanies([]);
           }
-        );
-        setRole(roleRes.data.role);
+        } else if (role === "employee") {
+          // Employee info
+          const profileRes = await axios.get(
+            `${import.meta.env.VITE_API_URL}/profile`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setName(profileRes.data?.name || user.displayName || "");
+          setPhoto(profileRes.data?.profileImage || user.photoURL || "");
 
-        // 2️⃣ profile
-        const profileRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/profile`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setName(profileRes.data?.name || user.displayName || "");
-        setPhoto(profileRes.data?.profileImage || user.photoURL || "");
-
-        // 3️⃣ company affiliations (employee)
-        const companyRes = await axios.get(
-          `${import.meta.env.VITE_API_URL}/employee/companies`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setCompanies(companyRes.data || []);
+          const companyRes = await axios.get(
+            `${import.meta.env.VITE_API_URL}/employee/companies`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setCompanies(companyRes.data || []);
+        }
       } catch (err) {
+        console.error(err);
         toast.error("Failed to load profile");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfileData();
-  }, [user]);
+    fetchProfile();
+  }, [user, role]);
 
   // 🔹 Update profile
   const handleUpdateProfile = async (e) => {
@@ -68,7 +69,6 @@ const Profile = () => {
 
     try {
       let imageUrl = photo;
-
       if (e.target.image.files[0]) {
         imageUrl = await imgUpload(e.target.image.files[0]);
       }
@@ -76,40 +76,37 @@ const Profile = () => {
       const token = await user.getIdToken();
 
       await axios.patch(
-        `${import.meta.env.VITE_API_URL}/profile`,
-        {
-          name,
-          profileImage: imageUrl,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `${import.meta.env.VITE_API_URL}/user/update`,
+        { name, profileImage: imageUrl },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setPhoto(imageUrl);
       toast.success("Profile updated successfully");
     } catch (err) {
+      console.error(err);
       toast.error("Profile update failed");
     } finally {
       setUpdating(false);
     }
   };
 
-  // 🔹 Change password (Firebase reset email)
+  // 🔹 Change password
   const handleChangePassword = async () => {
     try {
       await sendPasswordResetEmail(auth, user.email);
       toast.success("Password reset email sent");
     } catch (err) {
+      console.error(err);
       toast.error("Failed to send reset email");
     }
   };
 
-  if (loading) return <p className="text-center">Loading...</p>;
+  if (loading) return <p className="text-center mt-20">Loading...</p>;
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="bg-white shadow-lg rounded-2xl md:w-4/5 lg:w-3/5">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+      <div className="bg-white shadow-lg rounded-2xl w-full md:w-4/5 lg:w-3/5">
         {/* Cover */}
         <div className="h-56 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-t-2xl" />
 
@@ -155,7 +152,7 @@ const Profile = () => {
                 />
               </div>
 
-              {/* Image upload with demo template */}
+              {/* Image upload */}
               <div className="flex flex-col w-full">
                 <label
                   htmlFor="image"
@@ -207,7 +204,6 @@ const Profile = () => {
           {/* Company affiliations */}
           <div className="w-full mt-6">
             <h3 className="text-sm font-semibold mb-2">Company Affiliations</h3>
-
             {companies.length === 0 ? (
               <p className="text-sm text-gray-500">
                 No active company affiliation

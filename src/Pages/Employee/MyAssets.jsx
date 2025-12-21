@@ -1,53 +1,46 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const MyAssets = () => {
-  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-
   const [assets, setAssets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  // Fetch assigned assets from server
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const res = await axiosSecure.get("/assets/assigned");
-        setAssets(res.data);
+        const { data } = await axiosSecure.get("/assigned-assets/my");
+        console.log(data);
+
+        setAssets(data);
       } catch (err) {
-        toast.error("Failed to fetch assets");
         console.error(err);
+        toast.error("Failed to fetch assigned assets");
       }
     };
+    fetchAssets();
+  }, [axiosSecure]);
 
-    if (user?.email) fetchAssets();
-  }, [user, axiosSecure]);
-
-  // Return asset
-  const handleReturn = async (assetId) => {
+  const handleReturn = async (id) => {
     try {
-      await axiosSecure.patch(`/assets/return/${assetId}`);
-      toast.success("Asset returned successfully");
+      await axiosSecure.patch(`/assigned-assets/${id}/return`);
       setAssets((prev) =>
-        prev.map((a) => (a.id === assetId ? { ...a, status: "Returned" } : a))
+        prev.map((a) => (a._id === id ? { ...a, status: "returned" } : a))
       );
+      toast.success("Asset returned successfully");
     } catch (err) {
-      toast.error("Failed to return asset");
       console.error(err);
+      toast.error("Failed to return asset");
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  // Apply search and filter
   const filteredAssets = assets
-    .filter((a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .filter((a) => (filterType === "all" ? true : a.type === filterType));
+    .filter((a) =>
+      a.assetName?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((a) => (filterType === "all" ? true : a.assetType === filterType));
 
   return (
     <div className="p-6 bg-white rounded-lg shadow space-y-6">
@@ -62,7 +55,6 @@ const MyAssets = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="input w-full md:w-1/3"
         />
-
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
@@ -72,9 +64,8 @@ const MyAssets = () => {
           <option value="Returnable">Returnable</option>
           <option value="Non-returnable">Non-returnable</option>
         </select>
-
         <button
-          onClick={handlePrint}
+          onClick={() => window.print()}
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
         >
           Print
@@ -90,42 +81,40 @@ const MyAssets = () => {
               <th className="border px-4 py-2">Asset Name</th>
               <th className="border px-4 py-2">Type</th>
               <th className="border px-4 py-2">Company</th>
-              <th className="border px-4 py-2">Request Date</th>
-              <th className="border px-4 py-2">Approval Date</th>
+              <th className="border px-4 py-2">Assignment Date</th>
+              
               <th className="border px-4 py-2">Status</th>
               <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAssets.length > 0 ? (
-              filteredAssets.map((asset) => (
-                <tr key={asset.id} className="text-center">
+            {assets.length > 0 ? (
+              assets.map((asset) => (
+                <tr key={asset._id} className="text-center">
                   <td className="border px-4 py-2">
                     <img
-                      src={asset.image || "https://via.placeholder.com/50"}
-                      alt={asset.name}
+                      src={asset.assetImage || "https://via.placeholder.com/50"}
+                      alt={asset.assetName}
                       className="w-12 h-12 object-cover mx-auto rounded"
                     />
                   </td>
-                  <td className="border px-4 py-2">{asset.name}</td>
-                  <td className="border px-4 py-2">{asset.type}</td>
-                  <td className="border px-4 py-2">{asset.companyName}</td>
+                  <td className="border px-4 py-2">{asset.assetName}</td>
+                  <td className="border px-4 py-2">{asset.assetType}</td>
                   <td className="border px-4 py-2">
-                    {new Date(asset.requestDate).toLocaleDateString()}
+                    {asset.companyName || "-"}
                   </td>
                   <td className="border px-4 py-2">
-                    {asset.approvalDate
-                      ? new Date(asset.approvalDate).toLocaleDateString()
-                      : "-"}
+                    {new Date(asset.assignmentDate).toLocaleDateString()}
                   </td>
+                 
                   <td className="border px-4 py-2 font-semibold">
                     {asset.status}
                   </td>
                   <td className="border px-4 py-2">
-                    {asset.status === "Approved" &&
-                    asset.type === "Returnable" ? (
+                    {asset.status === "assigned" &&
+                    asset.assetType === "Returnable" ? (
                       <button
-                        onClick={() => handleReturn(asset.id)}
+                        onClick={() => handleReturn(asset._id)}
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
                       >
                         Return

@@ -1,75 +1,121 @@
 import { Link, NavLink, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
-import useRole from "../../../hooks/useRole";
 
 const Navbar = () => {
-  const { user, logOut } = useAuth();
-  const [role, roleLoading] = useRole();
+  const { user, role, loading, logOut } = useAuth();
   const navigate = useNavigate();
+
+  if (loading) return null;
 
   const handleLogout = async () => {
     await logOut();
-    navigate("/", { replace: true });
+    navigate("/");
   };
 
   return (
-    <div className="navbar bg-base-100 shadow-md px-4">
-      <div className="max-w-7xl mx-auto w-full flex justify-between items-center">
-        {/* LOGO */}
-        <Link to="/" className="text-2xl font-extrabold text-indigo-600">
+    <div className="navbar bg-base-100 shadow-sm">
+      <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-4">
+      {/* ========== START ========== */}
+      
+      <div className="navbar-start">
+        
+        {/* Mobile Dropdown */}
+        <div className="dropdown">
+          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h8m-8 6h16"
+              />
+            </svg>
+          </div>
+
+          <ul
+            tabIndex={0}
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <NavLink to="/">Home</NavLink>
+            </li>
+
+            {!user && (
+              <>
+                <li>
+                  <NavLink to="/register/employee">Join as Employee</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/register/hr">Join as HR Manager</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/login">Login</NavLink>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
+
+        {/* Logo */}
+        <Link to="/" className="text-indigo-600 text-xl font-bold">
           AssetVerse
         </Link>
+      </div>
 
-        {/* PUBLIC LINKS */}
+      {/* ========== CENTER (Desktop Menu) ========== */}
+      <div className="navbar-center hidden lg:flex">
+        <ul className="menu menu-horizontal px-1">
+          <li>
+            <NavLink to="/">Home</NavLink>
+          </li>
+
+          {!user && (
+            <>
+              <li>
+                <NavLink to="/register-employee">Join as Employee</NavLink>
+              </li>
+              <li>
+                <NavLink to="/register-hr">Join as HR Manager</NavLink>
+              </li>
+            </>
+          )}
+        </ul>
+      </div>
+
+      {/* ========== END ========== */}
+      <div className="navbar-end">
         {!user && (
-          <div className="flex gap-2">
-            <NavLink to="/" className="btn btn-ghost btn-sm">
-              Home
-            </NavLink>
-            <NavLink to="/register-employee" className="btn btn-ghost btn-sm">
-              Join as Employee
-            </NavLink>
-            <NavLink to="/register-hr" className="btn btn-ghost btn-sm">
-              Join as HR Manager
-            </NavLink>
-            <NavLink to="/login" className="btn btn-primary btn-sm">
-              Login
-            </NavLink>
-          </div>
+          <NavLink to="/login" className="btn btn-primary btn-sm">
+            Login
+          </NavLink>
         )}
 
-        {/* USER DROPDOWN */}
-        {user && !roleLoading && (
+        {user && (
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+            <div
+              tabIndex={0}
+              role="button"
+              className="btn btn-ghost btn-circle avatar"
+            >
               <div className="w-9 rounded-full">
                 <img
                   src={user.photoURL || "https://i.ibb.co/2kRZ5q0/user.png"}
                   alt="profile"
                 />
               </div>
-            </label>
+            </div>
 
-            <ul className="menu menu-sm dropdown-content mt-3 z-[99] p-2 shadow bg-base-100 rounded-box w-52">
-              {role === "employee" && (
-                <>
-                  <li>
-                    <NavLink to="/dashboard/my-assets">My Assets</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/dashboard/my-team">My Team</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/dashboard/request-asset">
-                      Request Asset
-                    </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/dashboard/profile">Profile</NavLink>
-                  </li>
-                </>
-              )}
-
+            <ul
+              tabIndex={0}
+              className="menu dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-56 p-2 shadow"
+            >
+              {/* ===== HR ===== */}
               {role === "hr" && (
                 <>
                   <li>
@@ -86,28 +132,38 @@ const Navbar = () => {
                       Employee List
                     </NavLink>
                   </li>
+                </>
+              )}
+
+              {/* ===== EMPLOYEE ===== */}
+              {role === "employee" && (
+                <>
                   <li>
-                    <NavLink to="/dashboard/upgrade-package">
-                      Upgrade Package
-                    </NavLink>
+                    <NavLink to="/dashboard/my-assets">My Assets</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/dashboard/profile">Profile</NavLink>
+                    <NavLink to="/dashboard/my-team">My Team</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/dashboard/request-asset">
+                      Request Asset
+                    </NavLink>
                   </li>
                 </>
               )}
 
-              <li className="border-t mt-1">
-                <button
-                  onClick={handleLogout}
-                  className="text-error w-full text-left"
-                >
+              <li className="border-t mt-2">
+                <NavLink to="/profile">Profile</NavLink>
+              </li>
+              <li>
+                <button onClick={handleLogout} className="text-error">
                   Logout
                 </button>
               </li>
             </ul>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -3,12 +3,13 @@ import { toast } from "react-hot-toast";
 import { TbFidgetSpinner } from "react-icons/tb";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
-import { imgUpload, saveOrUpdateUser } from "../../utils";
-
+import { imgUpload } from "../../utils";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const RegisterHR = () => {
   const { createUser, updateUserProfile } = useAuth();
   const navigate = useNavigate();
+  const axiosSecure = useAxiosSecure();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -18,29 +19,28 @@ const RegisterHR = () => {
     const form = e.target;
     const name = form.name.value;
     const companyName = form.companyName.value;
-    const companyLogoFile = form.companyLogo.files[0]; 
+    const companyLogoFile = form.companyLogo.files[0];
     const email = form.email.value;
     const password = form.password.value;
     const dateOfBirth = form.dateOfBirth.value;
 
     try {
-      // 1. Upload company logo using reusable utils function
       let companyLogoUrl = "";
       if (companyLogoFile) {
         companyLogoUrl = await imgUpload(companyLogoFile);
       }
 
-      // 2. Create user in Firebase
+      // 1️⃣ Firebase create
       await createUser(email, password);
 
-      // 3. Update user profile in Firebase
-      await updateUserProfile(name, companyLogoUrl);
+      // 2️⃣ Firebase profile update
+      await updateUserProfile(name, companyLogoUrl, "hr");
 
-      // 4. Prepare HR user object
+      // 3️⃣ Backend save HR & company info
       const hrUser = {
         name,
         companyName,
-        companyLogo: companyLogoUrl,
+        companyLogo: companyLogoUrl || "",
         email,
         dateOfBirth,
         role: "hr",
@@ -49,13 +49,15 @@ const RegisterHR = () => {
         subscription: "basic",
       };
 
-      // 5. Save HR user to backend using reusable utils function
-      await saveOrUpdateUser(hrUser);
+      await axiosSecure.post("/user/hr", hrUser);
 
-      toast.success("HR account created successfully");
+      toast.success("HR account created. Default package: 5 employees.");
       navigate("/login");
     } catch (err) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(
+        err.response?.data?.message || err.message || "Failed to create account"
+      );
     } finally {
       setLoading(false);
     }
@@ -70,7 +72,6 @@ const RegisterHR = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Full Name */}
           <div>
             <label htmlFor="name" className="block mb-1 text-sm font-medium">
               Full Name
@@ -84,7 +85,6 @@ const RegisterHR = () => {
             />
           </div>
 
-          {/* Company Name */}
           <div>
             <label
               htmlFor="companyName"
@@ -101,7 +101,6 @@ const RegisterHR = () => {
             />
           </div>
 
-          {/* Company Logo */}
           <div>
             <label
               htmlFor="companyLogo"
@@ -129,7 +128,6 @@ const RegisterHR = () => {
             </p>
           </div>
 
-          {/* Email */}
           <div>
             <label htmlFor="email" className="block mb-1 text-sm font-medium">
               Company Email
@@ -144,7 +142,6 @@ const RegisterHR = () => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -163,7 +160,6 @@ const RegisterHR = () => {
             />
           </div>
 
-          {/* Date of Birth */}
           <div>
             <label
               htmlFor="dateOfBirth"
