@@ -1,41 +1,42 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const MyAssets = () => {
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+
   const [assets, setAssets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
-  // Fetch assigned assets
+  // Fetch assigned assets from server
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/assets/assigned?email=${user.email}`
-        );
-        const data = await res.json();
-        setAssets(data);
+        const res = await axiosSecure.get("/assets/assigned");
+        setAssets(res.data);
       } catch (err) {
         toast.error("Failed to fetch assets");
+        console.error(err);
       }
     };
 
-    if (user) fetchAssets();
-  }, [user]);
+    if (user?.email) fetchAssets();
+  }, [user, axiosSecure]);
 
+  // Return asset
   const handleReturn = async (assetId) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/assets/return/${assetId}`, {
-        method: "PATCH",
-      });
+      await axiosSecure.patch(`/assets/return/${assetId}`);
       toast.success("Asset returned successfully");
       setAssets((prev) =>
         prev.map((a) => (a.id === assetId ? { ...a, status: "Returned" } : a))
       );
     } catch (err) {
       toast.error("Failed to return asset");
+      console.error(err);
     }
   };
 
@@ -43,6 +44,7 @@ const MyAssets = () => {
     window.print();
   };
 
+  // Apply search and filter
   const filteredAssets = assets
     .filter((a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter((a) => (filterType === "all" ? true : a.type === filterType));
@@ -95,46 +97,46 @@ const MyAssets = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredAssets.map((asset) => (
-              <tr key={asset.id} className="text-center">
-                <td className="border px-4 py-2">
-                  <img
-                    src={asset.image || "https://via.placeholder.com/50"}
-                    alt={asset.name}
-                    className="w-12 h-12 object-cover mx-auto rounded"
-                  />
-                </td>
-                <td className="border px-4 py-2">{asset.name}</td>
-                <td className="border px-4 py-2">{asset.type}</td>
-                <td className="border px-4 py-2">{asset.companyName}</td>
-                <td className="border px-4 py-2">
-                  {new Date(asset.requestDate).toLocaleDateString()}
-                </td>
-                <td className="border px-4 py-2">
-                  {asset.approvalDate
-                    ? new Date(asset.approvalDate).toLocaleDateString()
-                    : "-"}
-                </td>
-                <td className="border px-4 py-2 font-semibold">
-                  {asset.status}
-                </td>
-                <td className="border px-4 py-2">
-                  {asset.status === "Approved" &&
-                  asset.type === "Returnable" ? (
-                    <button
-                      onClick={() => handleReturn(asset.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
-                    >
-                      Return
-                    </button>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-              </tr>
-            ))}
-
-            {filteredAssets.length === 0 && (
+            {filteredAssets.length > 0 ? (
+              filteredAssets.map((asset) => (
+                <tr key={asset.id} className="text-center">
+                  <td className="border px-4 py-2">
+                    <img
+                      src={asset.image || "https://via.placeholder.com/50"}
+                      alt={asset.name}
+                      className="w-12 h-12 object-cover mx-auto rounded"
+                    />
+                  </td>
+                  <td className="border px-4 py-2">{asset.name}</td>
+                  <td className="border px-4 py-2">{asset.type}</td>
+                  <td className="border px-4 py-2">{asset.companyName}</td>
+                  <td className="border px-4 py-2">
+                    {new Date(asset.requestDate).toLocaleDateString()}
+                  </td>
+                  <td className="border px-4 py-2">
+                    {asset.approvalDate
+                      ? new Date(asset.approvalDate).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td className="border px-4 py-2 font-semibold">
+                    {asset.status}
+                  </td>
+                  <td className="border px-4 py-2">
+                    {asset.status === "Approved" &&
+                    asset.type === "Returnable" ? (
+                      <button
+                        onClick={() => handleReturn(asset.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+                      >
+                        Return
+                      </button>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan={8} className="border px-4 py-2 text-gray-500">
                   No assets found.

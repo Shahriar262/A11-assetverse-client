@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { TbFidgetSpinner } from "react-icons/tb";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
+import { imgUpload } from "../../utils";
 
 const RegisterEmployee = () => {
   const { createUser, updateUserProfile } = useAuth();
@@ -18,19 +19,30 @@ const RegisterEmployee = () => {
     const email = form.email.value;
     const password = form.password.value;
     const dateOfBirth = form.dateOfBirth.value;
+    const imageFile = form.image.files[0];
 
     try {
+      // Firebase user create
       await createUser(email, password);
-      await updateUserProfile(name, null);
 
+      // Upload image if exists
+      let photoURL = null;
+      if (imageFile) {
+        photoURL = await imgUpload(imageFile);
+      }
+
+      await updateUserProfile(name, photoURL);
+
+      // Save user in backend
       const employeeUser = {
         name,
         email,
         dateOfBirth,
         role: "employee",
+        profileImage: photoURL,
       };
 
-      await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/user`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(employeeUser),
@@ -39,7 +51,8 @@ const RegisterEmployee = () => {
       toast.success("Employee account created");
       navigate("/login");
     } catch (err) {
-      toast.error(err.message);
+      console.error(err);
+      toast.error(err.message || "Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -67,7 +80,7 @@ const RegisterEmployee = () => {
               id="name"
               required
               placeholder="Enter your full name"
-              className="input"
+              className="input w-full"
             />
           </div>
 
@@ -85,7 +98,7 @@ const RegisterEmployee = () => {
               id="email"
               required
               placeholder="Enter your personal email"
-              className="input"
+              className="input w-full"
             />
           </div>
 
@@ -104,7 +117,7 @@ const RegisterEmployee = () => {
               required
               minLength={6}
               placeholder="Enter your password"
-              className="input"
+              className="input w-full"
             />
           </div>
 
@@ -121,8 +134,36 @@ const RegisterEmployee = () => {
               name="dateOfBirth"
               id="dateOfBirth"
               required
-              className="input"
+              className="input w-full"
             />
+          </div>
+
+          {/* Profile Image */}
+          <div>
+            <label
+              htmlFor="image"
+              className="block mb-2 text-sm font-medium text-gray-700"
+            >
+              Profile Image
+            </label>
+            <input
+              id="image"
+              name="image"
+              type="file"
+              accept="image/*"
+              className="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700
+                hover:file:bg-indigo-100
+                bg-gray-100 border border-dashed border-indigo-300 rounded-md cursor-pointer
+                focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400
+                py-2"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              PNG, JPG or JPEG (max 2MB)
+            </p>
           </div>
 
           <button className="bg-indigo-600 w-full rounded-md py-3 text-white">

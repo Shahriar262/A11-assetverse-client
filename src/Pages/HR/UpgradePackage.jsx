@@ -1,49 +1,49 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
-
-// Stripe public key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+import { useNavigate } from "react-router";
 
 const UpgradePackage = () => {
   const [packages, setPackages] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
+  const navigate = useNavigate();
 
-  // Load available packages
+  // Load available packages and payment history
   useEffect(() => {
-    // Mock data (replace with API call)
-    setPackages([
-      { id: 1, name: "Basic", price: 10, limit: 5 },
-      { id: 2, name: "Pro", price: 25, limit: 15 },
-      { id: 3, name: "Enterprise", price: 50, limit: 50 },
-    ]);
+    const fetchPackages = async () => {
+      try {
+        const pkgRes = await axios.get(
+          `${import.meta.env.VITE_API_URL}/packages`
+        );
+        setPackages(pkgRes.data);
 
-    // Mock payment history
-    setPaymentHistory([
-      {
-        id: "pay_1",
-        packageName: "Basic",
-        amount: 10,
-        date: "2024-12-01",
-        status: "Success",
-      },
-    ]);
+        const historyRes = await axios.get(
+          `${import.meta.env.VITE_API_URL}/payments`
+        );
+        setPaymentHistory(historyRes.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load packages or payment history");
+      }
+    };
+
+    fetchPackages();
   }, []);
 
   const handlePayment = async (pkg) => {
     try {
-      const stripe = await stripePromise;
-
       // Create checkout session on backend
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/create-stripe-session`,
-        {
-          packageId: pkg.id,
-        }
+        { packageId: pkg._id }
       );
 
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      // Redirect user to Stripe Checkout page (server returns URL)
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error("Failed to initiate payment");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Payment failed. Try again.");
@@ -58,7 +58,7 @@ const UpgradePackage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {packages.map((pkg) => (
           <div
-            key={pkg.id}
+            key={pkg._id}
             className="border rounded-lg p-4 flex flex-col justify-between shadow hover:shadow-md transition"
           >
             <h3 className="text-xl font-semibold mb-2">{pkg.name}</h3>
@@ -91,7 +91,7 @@ const UpgradePackage = () => {
             </thead>
             <tbody>
               {paymentHistory.map((ph) => (
-                <tr key={ph.id}>
+                <tr key={ph._id}>
                   <td className="border px-4 py-2">{ph.packageName}</td>
                   <td className="border px-4 py-2">${ph.amount}</td>
                   <td className="border px-4 py-2">

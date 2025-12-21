@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const RequestAsset = () => {
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const [assets, setAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [note, setNote] = useState("");
@@ -14,17 +16,14 @@ const RequestAsset = () => {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/assets/available`
-        );
-        const data = await res.json();
-        setAssets(data);
+        const res = await axiosSecure.get("/available-assets");
+        setAssets(res.data);
       } catch (err) {
         toast.error("Failed to fetch assets");
       }
     };
     fetchAssets();
-  }, []);
+  }, [axiosSecure]);
 
   const openModal = (asset) => {
     setSelectedAsset(asset);
@@ -39,36 +38,20 @@ const RequestAsset = () => {
   };
 
   const handleRequest = async () => {
-    if (!note.trim()) {
-      toast.error("Please add a note for the request");
-      return;
-    }
+    if (!selectedAsset) return;
 
     setLoading(true);
 
     try {
-      const requestData = {
-        assetId: selectedAsset.id,
-        assetName: selectedAsset.name,
-        assetType: selectedAsset.type,
-        companyName: selectedAsset.companyName,
-        quantity: 1,
-        employeeEmail: user.email,
-        employeeName: user.displayName,
+      await axiosSecure.post("/requests", {
+        assetId: selectedAsset._id,
         note,
-        status: "Pending",
-        requestDate: new Date().toISOString(),
-      };
-
-      await fetch(`${import.meta.env.VITE_API_URL}/requests`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(requestData),
       });
 
       toast.success("Asset request created");
       closeModal();
     } catch (err) {
+      console.error(err);
       toast.error("Failed to request asset");
     } finally {
       setLoading(false);
@@ -83,18 +66,20 @@ const RequestAsset = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {assets.map((asset) => (
           <div
-            key={asset.id}
+            key={asset._id}
             className="bg-white shadow rounded-lg overflow-hidden border"
           >
             <img
-              src={asset.image || "https://via.placeholder.com/150"}
-              alt={asset.name}
+              src={asset.productImage || "https://via.placeholder.com/150"}
+              alt={asset.productName}
               className="w-full h-40 object-cover"
             />
             <div className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg">{asset.name}</h3>
-              <p className="text-gray-600">Type: {asset.type}</p>
-              <p className="text-gray-600">Available: {asset.quantity}</p>
+              <h3 className="font-semibold text-lg">{asset.productName}</h3>
+              <p className="text-gray-600">Type: {asset.productType}</p>
+              <p className="text-gray-600">
+                Available: {asset.availableQuantity}
+              </p>
 
               <button
                 onClick={() => openModal(asset)}
@@ -112,7 +97,7 @@ const RequestAsset = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4">
-              Request "{selectedAsset.name}"
+              Request "{selectedAsset.productName}"
             </h3>
             <textarea
               placeholder="Add a note for your request..."

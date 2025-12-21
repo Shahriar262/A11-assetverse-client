@@ -1,44 +1,45 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const AssetList = () => {
+  const axiosSecure = useAxiosSecure();
   const [assets, setAssets] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Temporary demo data (replace with API later)
+  // Load all assets from server
   useEffect(() => {
-    setAssets([
-      {
-        _id: "1",
-        name: "Laptop",
-        type: "Returnable",
-        quantity: 12,
-        image: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-        createdAt: "2024-12-01",
-      },
-      {
-        _id: "2",
-        name: "Office Chair",
-        type: "Non-returnable",
-        quantity: 25,
-        image: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-        createdAt: "2024-11-28",
-      },
-    ]);
-  }, []);
+    const fetchAssets = async () => {
+      try {
+        const res = await axiosSecure.get("/assets");
+        setAssets(res.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch assets");
+      }
+    };
+    fetchAssets();
+  }, [axiosSecure]);
 
   // Search filter
   const filteredAssets = assets.filter((asset) =>
-    asset.name.toLowerCase().includes(search.toLowerCase())
+    asset.productName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = (id) => {
-    const confirmDelete = confirm("Are you sure you want to delete this asset?");
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this asset?"
+    );
     if (!confirmDelete) return;
 
-    
-    setAssets((prev) => prev.filter((asset) => asset._id !== id));
-    toast.success("Asset deleted");
+    try {
+      await axiosSecure.delete(`/assets/${id}`);
+      setAssets((prev) => prev.filter((asset) => asset._id !== id));
+      toast.success("Asset deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete asset");
+    }
   };
 
   return (
@@ -85,10 +86,7 @@ const AssetList = () => {
           <tbody>
             {filteredAssets.length === 0 ? (
               <tr>
-                <td
-                  colSpan="6"
-                  className="text-center py-6 text-gray-500"
-                >
+                <td colSpan="6" className="text-center py-6 text-gray-500">
                   No assets found
                 </td>
               </tr>
@@ -98,45 +96,45 @@ const AssetList = () => {
                   {/* Image */}
                   <td className="px-4 py-3">
                     <img
-                      src={asset.image}
-                      alt={asset.name}
+                      src={
+                        asset.productImage || "https://via.placeholder.com/50"
+                      }
+                      alt={asset.productName}
                       className="w-12 h-12 rounded object-cover border"
                     />
                   </td>
 
                   {/* Name */}
                   <td className="px-4 py-3 text-sm text-gray-800">
-                    {asset.name}
+                    {asset.productName}
                   </td>
 
                   {/* Type */}
                   <td className="px-4 py-3 text-sm">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        asset.type === "Returnable"
+                        asset.productType === "Returnable"
                           ? "bg-green-100 text-green-700"
                           : "bg-orange-100 text-orange-700"
                       }`}
                     >
-                      {asset.type}
+                      {asset.productType}
                     </span>
                   </td>
 
                   {/* Quantity */}
                   <td className="px-4 py-3 text-sm text-gray-700">
-                    {asset.quantity}
+                    {asset.availableQuantity}
                   </td>
 
                   {/* Date */}
                   <td className="px-4 py-3 text-sm text-gray-500">
-                    {asset.createdAt}
+                    {new Date(asset.dateAdded).toLocaleDateString()}
                   </td>
 
                   {/* Actions */}
                   <td className="px-4 py-3 text-center space-x-2">
-                    <button
-                      className="px-3 py-1 text-sm bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200"
-                    >
+                    <button className="px-3 py-1 text-sm bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200">
                       Edit
                     </button>
                     <button

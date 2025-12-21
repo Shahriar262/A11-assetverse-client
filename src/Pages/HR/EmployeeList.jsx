@@ -1,53 +1,54 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const EmployeeList = () => {
+  const axiosSecure = useAxiosSecure();
   const [employees, setEmployees] = useState([]);
-  const [employeeLimit, setEmployeeLimit] = useState({ used: 3, total: 5 });
+  const [employeeLimit, setEmployeeLimit] = useState({ used: 0, total: 0 });
 
   useEffect(() => {
-    // Mock employee data
-    const demoEmployees = [
-      {
-        _id: "emp1",
-        name: "John Doe",
-        email: "john@example.com",
-        photo: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-        joinDate: "2024-01-10",
-        assetsCount: 2,
-      },
-      {
-        _id: "emp2",
-        name: "Jane Smith",
-        email: "jane@example.com",
-        photo: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-        joinDate: "2024-02-05",
-        assetsCount: 1,
-      },
-      {
-        _id: "emp3",
-        name: "Mike Johnson",
-        email: "mike@example.com",
-        photo: "https://i.ibb.co/ZYW3VTp/brown-brim.png",
-        joinDate: "2024-03-01",
-        assetsCount: 3,
-      },
-    ];
-    setEmployees(demoEmployees);
-  }, []);
+    const fetchLimit = async () => {
+      try {
+        const res = await axiosSecure.get("/employee/limit");
+        setEmployeeLimit(res.data); 
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch employee limit");
+      }
+    };
+    fetchLimit();
+  }, [axiosSecure]);
 
-  const handleRemove = (id) => {
-    const confirm = window.confirm(
+  // Fetch employees
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await axiosSecure.get("/employee/team");
+        setEmployees(res.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch employees");
+      }
+    };
+    fetchEmployees();
+  }, [axiosSecure]);
+
+  const handleRemove = async (id) => {
+    const confirmDelete = window.confirm(
       "Are you sure you want to remove this employee from your team?"
     );
-    if (!confirm) return;
+    if (!confirmDelete) return;
 
-    // Backend API call to remove employee from team
-    setEmployees((prev) => prev.filter((emp) => emp._id !== id));
-    toast.success("Employee removed from team");
-
-    // Decrement used employee count
-    setEmployeeLimit((prev) => ({ ...prev, used: prev.used - 1 }));
+    try {
+      await axiosSecure.delete(`/employee/remove/${id}`); 
+      setEmployees((prev) => prev.filter((emp) => emp._id !== id));
+      setEmployeeLimit((prev) => ({ ...prev, used: prev.used - 1 }));
+      toast.success("Employee removed from team");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove employee");
+    }
   };
 
   return (
@@ -68,7 +69,7 @@ const EmployeeList = () => {
               className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm"
             >
               <img
-                src={emp.photo}
+                src={emp.photo || "https://i.ibb.co/2kRZ5q0/user.png"}
                 alt={emp.name}
                 className="w-20 h-20 rounded-full object-cover mb-3"
               />

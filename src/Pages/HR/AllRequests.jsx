@@ -1,63 +1,59 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const AllRequests = () => {
+  const axiosSecure = useAxiosSecure();
   const [requests, setRequests] = useState([]);
 
-  // Load mock data
+  // Load all requests
   useEffect(() => {
-    const demoRequests = [
-      {
-        _id: "req1",
-        employee: "John Doe",
-        asset: "Laptop",
-        assetId: "asset1",
-        date: "2024-01-10",
-        status: "Pending",
-        quantity: 1,
-      },
-      {
-        _id: "req2",
-        employee: "Jane Smith",
-        asset: "Office Chair",
-        assetId: "asset2",
-        date: "2024-01-12",
-        status: "Approved",
-        quantity: 1,
-      },
-      {
-        _id: "req3",
-        employee: "Mike Johnson",
-        asset: "Monitor",
-        assetId: "asset3",
-        date: "2024-01-15",
-        status: "Rejected",
-        quantity: 1,
-      },
-    ];
-    setRequests(demoRequests);
-  }, []);
+    const fetchRequests = async () => {
+      try {
+        const res = await axiosSecure.get("/requests");
+        setRequests(res.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch requests");
+      }
+    };
+    fetchRequests();
+  }, [axiosSecure]);
 
-  const handleApprove = (id) => {
-    const confirm = window.confirm("Approve this request?");
-    if (!confirm) return;
+  const handleApprove = async (id) => {
+    const confirmApprove = window.confirm("Approve this request?");
+    if (!confirmApprove) return;
 
-    // Backend API call here to update status, deduct asset quantity, add affiliation
-    setRequests((prev) =>
-      prev.map((req) => (req._id === id ? { ...req, status: "Approved" } : req))
-    );
-    toast.success("Request approved");
+    try {
+      await axiosSecure.patch(`/requests/${id}/approve`);
+      setRequests((prev) =>
+        prev.map((req) =>
+          req._id === id ? { ...req, requestStatus: "approved" } : req
+        )
+      );
+      toast.success("Request approved");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to approve request");
+    }
   };
 
-  const handleReject = (id) => {
-    const confirm = window.confirm("Reject this request?");
-    if (!confirm) return;
+  const handleReject = async (id) => {
+    const confirmReject = window.confirm("Reject this request?");
+    if (!confirmReject) return;
 
-    // Backend API call here to update status
-    setRequests((prev) =>
-      prev.map((req) => (req._id === id ? { ...req, status: "Rejected" } : req))
-    );
-    toast.error("Request rejected");
+    try {
+      await axiosSecure.patch(`/requests/${id}/reject`);
+      setRequests((prev) =>
+        prev.map((req) =>
+          req._id === id ? { ...req, requestStatus: "rejected" } : req
+        )
+      );
+      toast.error("Request rejected");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to reject request");
+    }
   };
 
   return (
@@ -85,27 +81,31 @@ const AllRequests = () => {
               </tr>
             ) : (
               requests.map((req) => (
-                <tr key={req._id} className="border-b hover:bg-gray-50 text-sm">
-                  <td className="p-3 font-medium">{req.employee}</td>
-                  <td className="p-3">{req.asset}</td>
+                <tr
+                  key={req._id}
+                  className="border-b hover:bg-gray-50 text-sm text-center"
+                >
+                  <td className="p-3 font-medium">{req.requesterName}</td>
+                  <td className="p-3">{req.assetName}</td>
                   <td className="p-3">
-                    {new Date(req.date).toLocaleDateString()}
+                    {new Date(req.requestDate).toLocaleDateString()}
                   </td>
                   <td className="p-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        req.status === "Pending"
+                        req.requestStatus === "pending"
                           ? "bg-yellow-100 text-yellow-700"
-                          : req.status === "Approved"
+                          : req.requestStatus === "approved"
                           ? "bg-green-100 text-green-700"
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {req.status}
+                      {req.requestStatus.charAt(0).toUpperCase() +
+                        req.requestStatus.slice(1)}
                     </span>
                   </td>
                   <td className="p-3 text-center space-x-2">
-                    {req.status === "Pending" && (
+                    {req.requestStatus === "pending" ? (
                       <>
                         <button
                           onClick={() => handleApprove(req._id)}
@@ -120,8 +120,7 @@ const AllRequests = () => {
                           Reject
                         </button>
                       </>
-                    )}
-                    {req.status !== "Pending" && (
+                    ) : (
                       <span className="text-gray-500 text-xs">No Actions</span>
                     )}
                   </td>

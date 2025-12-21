@@ -18,7 +18,7 @@ const RegisterHR = () => {
     const form = e.target;
     const name = form.name.value;
     const companyName = form.companyName.value;
-    const companyLogoFile = form.companyLogo.files[0]; // file input
+    const companyLogoFile = form.companyLogo.files[0]; 
     const email = form.email.value;
     const password = form.password.value;
     const dateOfBirth = form.dateOfBirth.value;

@@ -1,42 +1,42 @@
 import { useState } from "react";
-import { imgUpload } from "../../utils";
 import { toast } from "react-hot-toast";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { imgUpload } from "../../utils";
 
 const AddAssetForm = () => {
   const [loading, setLoading] = useState(false);
+  const axiosSecure = useAxiosSecure();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const form = e.target;
-    const name = form.name.value;
-    const type = form.type.value;
-    const quantity = Number(form.quantity.value);
+    const productName = form.name.value;
+    const productType = form.type.value; 
+    const productQuantity = Number(form.quantity.value);
     const imageFile = form.image.files[0];
 
     try {
-      let imageUrl = "";
+      let productImage = "";
 
       if (imageFile) {
-        imageUrl = await imgUpload(imageFile);
+        productImage = await imgUpload(imageFile);
       }
 
       const assetData = {
-        name,
-        type, // returnable | non-returnable
-        quantity,
-        image: imageUrl,
-        createdAt: new Date(),
+        productName,
+        productType,
+        productQuantity,
+        productImage,
       };
 
-      // TODO: backend API call
-      // await saveAsset(assetData)
+      await axiosSecure.post("/assets", assetData);
 
-      console.log(assetData);
       toast.success("Asset added successfully");
       form.reset();
     } catch (err) {
+      console.error(err);
       toast.error("Failed to add asset");
     } finally {
       setLoading(false);
@@ -79,8 +79,8 @@ const AddAssetForm = () => {
                 className="w-full px-4 py-3 border rounded-md focus:outline-indigo-500"
               >
                 <option value="">Select type</option>
-                <option value="returnable">Returnable</option>
-                <option value="non-returnable">Non-returnable</option>
+                <option value="Returnable">Returnable</option>
+                <option value="Non-returnable">Non-returnable</option>
               </select>
             </div>
           </div>
