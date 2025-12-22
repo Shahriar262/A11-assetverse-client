@@ -1,16 +1,102 @@
-# React + Vite
+# AssetVerse
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📦 Corporate Asset Management System
 
-Currently, two official plugins are available:
+**AssetVerse** is a corporate asset management system designed to help organizations manage company assets, employee requests, and HR approvals efficiently.  
+It provides role-based dashboards for **HR Managers** and **Employees**, ensuring transparency, control, and streamlined asset tracking.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🌐 Live URL
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+👉 https://assetverse-client-sr262.netlify.app  
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🎯 Purpose
+
+- Digitize corporate asset management
+- Track company assets in real time
+- Manage employee asset requests
+- Enable HR approval workflows
+- Maintain clear company–employee affiliations
+
+---
+
+## ✨ Key Features
+
+### 🔐 Authentication & Roles
+
+- Firebase authentication
+- Role-based access (HR & Employee)
+- Secure JWT-protected APIs
+
+### 🧑‍💼 HR Manager Features
+
+- Add, edit, and delete assets
+- View all employee asset requests
+- Approve or reject requests
+- View employees by company
+- Manage company-specific assets
+
+### 👨‍💻 Employee Features
+
+- Request company assets
+- View request status (Pending / Approved / Rejected)
+- View affiliated company
+- My Team page (colleagues by company)
+- Upcoming birthdays section
+
+### 📊 Asset Management
+
+- Returnable & non-returnable assets
+- Asset image upload
+- Quantity tracking
+- Request history
+
+### 👤 Profile Management
+
+- Update name & profile picture
+- View company affiliations
+- Password reset via email
+
+---
+
+## 🧰 Technologies Used
+
+### Frontend
+
+- React
+- React Router
+- Tailwind CSS
+- Axios
+- React Hot Toast
+- Firebase Authentication
+- Date-fns
+- React Icons
+
+### Backend
+
+- Node.js
+- Express.js
+- MongoDB
+- Firebase Admin SDK
+- JWT (JSON Web Token)
+- Stripe (if payments enabled)
+
+---
+
+## 📦 npm Packages Used
+
+### Frontend
+
+```bash
+react
+react-router-dom
+axios
+firebase
+react-hot-toast
+date-fns
+react-icons
+```
