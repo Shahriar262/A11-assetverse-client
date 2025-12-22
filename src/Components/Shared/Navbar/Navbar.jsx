@@ -153,7 +153,7 @@ const Navbar = () => {
               )}
 
               <li className="border-t mt-2">
-                <NavLink to="/profile">Profile</NavLink>
+                <NavLink to="/dashboard/profile">Profile</NavLink>
               </li>
               <li>
                 <button onClick={handleLogout} className="text-error">

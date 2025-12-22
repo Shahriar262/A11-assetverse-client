@@ -2,16 +2,22 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
 import LoadingSpinner from "../../Components/Shared/LoadingSpinner";
+import { useEffect } from "react";
 
 const Login = () => {
-  const { signIn, loading, user } = useAuth();
+  const { signIn, loading, user, role, authReady } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state || "/";
 
-  if (loading) return <LoadingSpinner />;
-  if (user) return <Navigate to={from} replace />;
+  useEffect(() => {
+    if (authReady && user && role) {
+      navigate(from, { replace: true });
+    }
+  }, [authReady, user, role, navigate, from]);
+
+  if (loading || !authReady) return <LoadingSpinner />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +27,6 @@ const Login = () => {
     try {
       await signIn(email, password);
       toast.success("Login successful");
-      navigate(from, { replace: true });
     } catch (err) {
       toast.error("Invalid email or password");
     }

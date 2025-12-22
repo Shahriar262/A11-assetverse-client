@@ -20,10 +20,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  /* =========================
-      AUTH FUNCTIONS
-  ========================= */
+  const [authReady, setAuthReady] = useState(false); 
 
   const createUser = (email, password) => {
     setLoading(true);
@@ -53,11 +50,8 @@ const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     setLoading(false);
+    setAuthReady(false);
   };
-
-  /* =========================
-      AUTH STATE OBSERVER
-  ========================= */
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -70,15 +64,13 @@ const AuthProvider = ({ children }) => {
           const res = await axios.get(
             `${import.meta.env.VITE_API_URL}/user/role`,
             {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+              headers: { Authorization: `Bearer ${token}` },
             }
           );
 
           setRole(res.data.role || null);
         } catch (error) {
-          console.error("❌ Role fetch failed:", error);
+          console.error("Role fetch failed:", error);
           setRole(null);
         }
       } else {
@@ -86,19 +78,17 @@ const AuthProvider = ({ children }) => {
       }
 
       setLoading(false);
+      setAuthReady(true); 
     });
 
     return () => unsubscribe();
   }, []);
 
-  /* =========================
-      CONTEXT VALUE
-  ========================= */
-
   const authInfo = {
     user,
     role,
     loading,
+    authReady, 
     createUser,
     signIn,
     signInWithGoogle,
