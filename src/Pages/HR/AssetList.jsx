@@ -46,50 +46,88 @@ const AssetList = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow">
       <h2 className="text-2xl font-semibold mb-4">Assets Lists</h2>
+
       {assets.length === 0 ? (
         <p className="text-gray-500">No assets found.</p>
       ) : (
-        <table className="w-full border-collapse border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border px-4 py-2">Image</th>
-              <th className="border px-4 py-2">Name</th>
-              <th className="border px-4 py-2">Type</th>
-              <th className="border px-4 py-2">Available Quantity</th>
-              <th className="border px-4 py-2">Date Added</th>
-              <th className="border px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <>
+         
+          <div className="hidden sm:block">
+            <table className="w-full border-collapse border">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border px-4 py-2">Image</th>
+                  <th className="border px-4 py-2">Name</th>
+                  <th className="border px-4 py-2">Type</th>
+                  <th className="border px-4 py-2">Quantity</th>
+                  <th className="border px-4 py-2">Date</th>
+                  <th className="border px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.map((asset) => (
+                  <tr key={asset._id}>
+                    <td className="border px-4 py-2">
+                      <img
+                        src={asset.productImage}
+                        className="w-12 h-12 rounded"
+                      />
+                    </td>
+                    <td className="border px-4 py-2">{asset.name}</td>
+                    <td className="border px-4 py-2">{asset.type}</td>
+                    <td className="border px-4 py-2">
+                      {asset.availableQuantity}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {new Date(asset.dateAdded).toLocaleDateString()}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <button
+                        onClick={() => handleDelete(asset._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+       
+          <div className="sm:hidden space-y-4">
             {assets.map((asset) => (
-              <tr key={asset._id}>
-                <td className="border px-4 py-2">
-                  <img
-                    src={
-                      asset.productImage || "https://i.ibb.co/2kRZ5q0/user.png"
-                    }
-                    alt={asset.name}
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                </td>
-                <td className="border px-4 py-2">{asset.name}</td>
-                <td className="border px-4 py-2">{asset.type}</td>
-                <td className="border px-4 py-2">{asset.availableQuantity}</td>
-                <td className="border px-4 py-2">
-                  {new Date(asset.dateAdded).toLocaleDateString()}
-                </td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleDelete(asset._id)}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+              <div key={asset._id} className="border rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <img src={asset.productImage} className="w-14 h-14 rounded" />
+                  <h3 className="font-semibold">{asset.name}</h3>
+                </div>
+
+                <div className="text-sm space-y-1">
+                  <p>
+                    <span className="font-medium">Type:</span> {asset.type}
+                  </p>
+                  <p>
+                    <span className="font-medium">Quantity:</span>{" "}
+                    {asset.availableQuantity}
+                  </p>
+                  <p>
+                    <span className="font-medium">Date:</span>{" "}
+                    {new Date(asset.dateAdded).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => handleDelete(asset._id)}
+                  className="mt-3 w-full bg-red-500 text-white py-2 rounded"
+                >
+                  Delete
+                </button>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </>
       )}
     </div>
   );

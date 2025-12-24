@@ -47,18 +47,18 @@ const MyAssets = () => {
       <h2 className="text-2xl font-semibold">My Assets</h2>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <input
           type="text"
           placeholder="Search by asset name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="input w-full md:w-1/3"
+          className="input w-full sm:w-1/3"
         />
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="input w-full md:w-1/4"
+          className="input w-full sm:w-1/4"
         >
           <option value="all">All Types</option>
           <option value="Returnable">Returnable</option>
@@ -72,69 +72,119 @@ const MyAssets = () => {
         </button>
       </div>
 
-      {/* Assets Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-collapse border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="border px-4 py-2">Image</th>
-              <th className="border px-4 py-2">Asset Name</th>
-              <th className="border px-4 py-2">Type</th>
-              <th className="border px-4 py-2">Company</th>
-              <th className="border px-4 py-2">Assignment Date</th>
-              
-              <th className="border px-4 py-2">Status</th>
-              <th className="border px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.length > 0 ? (
-              assets.map((asset) => (
-                <tr key={asset._id} className="text-center">
-                  <td className="border px-4 py-2">
-                    <img
-                      src={asset.assetImage || "https://via.placeholder.com/50"}
-                      alt={asset.assetName}
-                      className="w-12 h-12 object-cover mx-auto rounded"
-                    />
-                  </td>
-                  <td className="border px-4 py-2">{asset.assetName}</td>
-                  <td className="border px-4 py-2">{asset.assetType}</td>
-                  <td className="border px-4 py-2">
-                    {asset.companyName || "-"}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {new Date(asset.assignmentDate).toLocaleDateString()}
-                  </td>
-                 
-                  <td className="border px-4 py-2 font-semibold">
-                    {asset.status}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {asset.status === "assigned" &&
-                    asset.assetType === "Returnable" ? (
-                      <button
-                        onClick={() => handleReturn(asset._id)}
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
-                      >
-                        Return
-                      </button>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
+      {filteredAssets.length === 0 ? (
+        <p className="text-gray-500">No assets found.</p>
+      ) : (
+        <>
+          
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="min-w-full border-collapse border border-gray-300">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border px-4 py-2">Image</th>
+                  <th className="border px-4 py-2">Asset Name</th>
+                  <th className="border px-4 py-2">Type</th>
+                  <th className="border px-4 py-2">Company</th>
+                  <th className="border px-4 py-2">Assignment Date</th>
+                  <th className="border px-4 py-2">Status</th>
+                  <th className="border px-4 py-2">Actions</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="border px-4 py-2 text-gray-500">
-                  No assets found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {filteredAssets.map((asset) => (
+                  <tr key={asset._id} className="text-center">
+                    <td className="border px-4 py-2">
+                      <img
+                        src={
+                          asset.assetImage || "https://via.placeholder.com/50"
+                        }
+                        className="w-12 h-12 mx-auto rounded object-cover"
+                      />
+                    </td>
+                    <td className="border px-4 py-2">{asset.assetName}</td>
+                    <td className="border px-4 py-2">{asset.assetType}</td>
+                    <td className="border px-4 py-2">
+                      {asset.companyName || "-"}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {new Date(asset.assignmentDate).toLocaleDateString()}
+                    </td>
+                    <td className="border px-4 py-2 font-semibold capitalize">
+                      {asset.status}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {asset.status === "assigned" &&
+                      asset.assetType === "Returnable" ? (
+                        <button
+                          onClick={() => handleReturn(asset._id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        >
+                          Return
+                        </button>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+         
+          <div className="sm:hidden space-y-4">
+            {filteredAssets.map((asset) => (
+              <div key={asset._id} className="border rounded-lg p-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={asset.assetImage || "https://via.placeholder.com/50"}
+                    className="w-14 h-14 rounded object-cover"
+                  />
+                  <div>
+                    <h3 className="font-semibold">{asset.assetName}</h3>
+                    <p className="text-xs text-gray-500">
+                      {asset.companyName || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-sm space-y-1 mb-3">
+                  <p>
+                    <span className="font-medium">Type:</span> {asset.assetType}
+                  </p>
+                  <p>
+                    <span className="font-medium">Assigned:</span>{" "}
+                    {new Date(asset.assignmentDate).toLocaleDateString()}
+                  </p>
+                  <p
+                    className={`font-semibold capitalize ${
+                      asset.status === "assigned"
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    Status: {asset.status}
+                  </p>
+                </div>
+
+                {asset.status === "assigned" &&
+                asset.assetType === "Returnable" ? (
+                  <button
+                    onClick={() => handleReturn(asset._id)}
+                    className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600"
+                  >
+                    Return Asset
+                  </button>
+                ) : (
+                  <p className="text-center text-gray-400 text-sm">
+                    No actions
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
