@@ -20,7 +20,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [authReady, setAuthReady] = useState(false); 
+  const [authReady, setAuthReady] = useState(false);
 
   const createUser = (email, password) => {
     setLoading(true);
@@ -50,7 +50,7 @@ const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     setLoading(false);
-    setAuthReady(false);
+    
   };
 
   useEffect(() => {
@@ -59,18 +59,16 @@ const AuthProvider = ({ children }) => {
 
       if (currentUser) {
         try {
-          const token = await currentUser.getIdToken(true);
-
+          const token = await currentUser.getIdToken();
           const res = await axios.get(
             `${import.meta.env.VITE_API_URL}/user/role`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-
           setRole(res.data.role || null);
-        } catch (error) {
-          console.error("Role fetch failed:", error);
+        } catch (err) {
+          console.error("Role fetch failed:", err);
           setRole(null);
         }
       } else {
@@ -88,7 +86,7 @@ const AuthProvider = ({ children }) => {
     user,
     role,
     loading,
-    authReady, 
+    authReady,
     createUser,
     signIn,
     signInWithGoogle,

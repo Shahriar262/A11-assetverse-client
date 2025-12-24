@@ -1,23 +1,25 @@
-import { Link, Navigate, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import useAuth from "../../hooks/useAuth";
 import LoadingSpinner from "../../Components/Shared/LoadingSpinner";
 import { useEffect } from "react";
 
 const Login = () => {
-  const { signIn, loading, user, role, authReady } = useAuth();
+  const { signIn, user, role, authReady } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state || "/";
 
   useEffect(() => {
-    if (authReady && user && role) {
+    if (!authReady) return;
+
+    if (user && role) {
       navigate(from, { replace: true });
     }
   }, [authReady, user, role, navigate, from]);
 
-  if (loading || !authReady) return <LoadingSpinner />;
+  if (!authReady) return <LoadingSpinner />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,7 +52,6 @@ const Login = () => {
               name="email"
               required
               className="w-full px-3 py-2 border rounded focus:outline-indigo-500"
-              placeholder="you@example.com"
             />
           </div>
 
@@ -61,36 +62,31 @@ const Login = () => {
               name="password"
               required
               className="w-full px-3 py-2 border rounded focus:outline-indigo-500"
-              placeholder="••••••••"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
           >
             Login
           </button>
         </form>
 
-        <p className="text-sm text-center text-gray-500 mt-6">
-          Don’t have an account?{" "}
+        <div className="text-sm text-center text-gray-500 mt-6">
+          <p>Don’t have an account?</p>
           <div className="flex justify-center gap-4 mt-3">
             <Link
               to="/register-employee"
-              className="text-indigo-600 hover:underline text-sm"
+              className="text-indigo-600 hover:underline"
             >
               Join as Employee
             </Link>
-
-            <Link
-              to="/register-hr"
-              className="text-indigo-600 hover:underline text-sm"
-            >
-              Join as HR Manager
+            <Link to="/register-hr" className="text-indigo-600 hover:underline">
+              Join as HR
             </Link>
           </div>
-        </p>
+        </div>
       </div>
     </div>
   );
