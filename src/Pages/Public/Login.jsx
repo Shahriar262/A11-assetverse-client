@@ -52,6 +52,7 @@ const Login = () => {
               name="email"
               required
               className="w-full px-3 py-2 border rounded focus:outline-indigo-500"
+              placeholder="Enter your name"
             />
           </div>
 
@@ -62,6 +63,7 @@ const Login = () => {
               name="password"
               required
               className="w-full px-3 py-2 border rounded focus:outline-indigo-500"
+              placeholder="Enter Password"
             />
           </div>
 

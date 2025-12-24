@@ -62,7 +62,7 @@ const RegisterEmployee = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="flex flex-col max-w-md w-[94%] md:w-full p-6 mt-6 md:mt-0 shadow-lg rounded-md sm:p-10 bg-white text-gray-900">
+      <div className="flex flex-col max-w-md w-[94%] md:w-full p-6 mt-6 shadow-lg rounded-md sm:p-10 bg-white text-gray-900">
         <div className="mb-8 text-center">
           <h1 className="my-3 text-4xl font-bold">Register as Employee</h1>
           <p className="text-sm text-gray-400">Create your personal account</p>
